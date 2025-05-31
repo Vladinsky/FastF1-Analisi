@@ -1,0 +1,618 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>F1 Data Analytics</title>
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&display=swap" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Orbitron', monospace;
+            background: 
+                url('f1_background.jpg') no-repeat center center fixed,
+                linear-gradient(135deg, rgba(10, 10, 10, 0.7) 0%, rgba(26, 10, 46, 0.7) 25%, rgba(22, 33, 62, 0.7) 50%, rgba(15, 52, 96, 0.7) 75%, rgba(10, 10, 10, 0.7) 100%);
+            background-size: cover, 400% 400%;
+            animation: gradientShift 15s ease infinite;
+            min-height: 100vh;
+            color: white;
+            overflow-x: hidden;
+            position: relative;
+        }
+
+        @keyframes gradientShift {
+            0% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+            100% { background-position: 0% 50%; }
+        }
+
+        /* Particle effects */
+        .particles {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 1;
+        }
+
+        .particle {
+            position: absolute;
+            width: 2px;
+            height: 2px;
+            background: #00ffff;
+            border-radius: 50%;
+            animation: float 6s ease-in-out infinite;
+            opacity: 0.7;
+        }
+
+        @keyframes float {
+            0%, 100% { transform: translateY(0px) rotate(0deg); }
+            33% { transform: translateY(-20px) rotate(120deg); }
+            66% { transform: translateY(10px) rotate(240deg); }
+        }
+
+        /* Racing lines */
+        .racing-lines {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 2;
+        }
+
+        .racing-line {
+            position: absolute;
+            height: 2px;
+            background: linear-gradient(90deg, transparent, #ff0040, #00ffff, transparent);
+            animation: raceLine 8s linear infinite;
+        }
+
+        .racing-line:nth-child(1) {
+            top: 20%;
+            width: 100%;
+            animation-delay: 0s;
+        }
+
+        .racing-line:nth-child(2) {
+            top: 60%;
+            width: 100%;
+            animation-delay: 2s;
+        }
+
+        .racing-line:nth-child(3) {
+            top: 80%;
+            width: 100%;
+            animation-delay: 4s;
+        }
+
+        @keyframes raceLine {
+            0% { left: -100%; opacity: 0; }
+            20% { opacity: 1; }
+            80% { opacity: 1; }
+            100% { left: 100%; opacity: 0; }
+        }
+
+        .container {
+            position: relative;
+            z-index: 10;
+            max-width: 1200px;
+            width: 100%;
+            margin: 0 auto;
+            padding: 40px 20px;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .main-panel {
+            background: rgba(0, 0, 0, 0.8);
+            backdrop-filter: blur(20px);
+            border-radius: 20px;
+            padding: 50px;
+            text-align: center;
+            box-shadow: 
+                0 0 50px rgba(0, 255, 255, 0.3),
+                0 0 100px rgba(255, 0, 64, 0.2),
+                inset 0 0 30px rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(0, 255, 255, 0.3);
+            position: relative;
+            overflow: hidden;
+            max-width: 800px;
+            width: 100%;
+        }
+
+        .main-panel::before {
+            content: '';
+            position: absolute;
+            top: -2px;
+            left: -2px;
+            right: -2px;
+            bottom: -2px;
+            background: linear-gradient(45deg, #ff0040, #00ffff, #ff0040, #00ffff);
+            background-size: 400% 400%;
+            animation: borderGlow 3s ease infinite;
+            border-radius: 22px;
+            z-index: -1;
+        }
+
+        @keyframes borderGlow {
+            0%, 100% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+        }
+
+        h1 {
+            font-size: 4rem;
+            font-weight: 900;
+            margin-bottom: 15px;
+            background: linear-gradient(45deg, #ff0040, #00ffff, #ff0040);
+            background-size: 200% 200%;
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            animation: titleGlow 3s ease infinite;
+            text-transform: uppercase;
+            letter-spacing: 4px;
+            filter: drop-shadow(0 0 20px rgba(0, 255, 255, 0.5));
+        }
+
+        @keyframes titleGlow {
+            0%, 100% { 
+                background-position: 0% 50%;
+                filter: drop-shadow(0 0 20px rgba(0, 255, 255, 0.5));
+            }
+            50% { 
+                background-position: 100% 50%;
+                filter: drop-shadow(0 0 30px rgba(255, 0, 64, 0.7));
+            }
+        }
+
+        .subtitle {
+            font-size: 1.4rem;
+            margin-bottom: 50px;
+            color: #b0bec5;
+            font-weight: 400;
+            letter-spacing: 2px;
+            text-transform: uppercase;
+        }
+
+        .form-container {
+            display: flex;
+            flex-direction: column;
+            gap: 35px;
+            align-items: center;
+            width: 100%;
+        }
+
+        .form-group {
+            width: 100%;
+            max-width: 500px;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 12px;
+            font-weight: 700;
+            font-size: 1.2rem;
+            color: #00ffff;
+            text-transform: uppercase;
+            letter-spacing: 3px;
+            text-shadow: 0 0 10px rgba(0, 255, 255, 0.5);
+        }
+
+        select {
+            width: 100%;
+            padding: 18px 25px;
+            font-family: 'Orbitron', monospace;
+            font-size: 1.1rem;
+            background: rgba(0, 0, 0, 0.8);
+            border: 2px solid rgba(0, 255, 255, 0.5);
+            border-radius: 12px;
+            color: white;
+            transition: all 0.4s ease;
+            backdrop-filter: blur(10px);
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        select:focus {
+            outline: none;
+            border-color: #00ffff;
+            box-shadow: 
+                0 0 20px rgba(0, 255, 255, 0.4),
+                inset 0 0 20px rgba(0, 255, 255, 0.1);
+            transform: translateY(-3px);
+            background: rgba(0, 255, 255, 0.1);
+        }
+
+        select:hover:not(:disabled) {
+            border-color: #ff0040;
+            box-shadow: 0 0 15px rgba(255, 0, 64, 0.3);
+        }
+
+        select option {
+            background: #1a1a1a;
+            color: white;
+            padding: 15px;
+            font-family: 'Orbitron', monospace;
+        }
+
+        select:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        .analyze-btn {
+            background: linear-gradient(45deg, #ff0040, #ff8a80, #ff0040);
+            background-size: 200% 200%;
+            border: none;
+            padding: 20px 60px;
+            font-family: 'Orbitron', monospace;
+            font-size: 1.3rem;
+            font-weight: 900;
+            color: white;
+            border-radius: 50px;
+            cursor: pointer;
+            transition: all 0.4s ease;
+            text-transform: uppercase;
+            letter-spacing: 3px;
+            box-shadow: 
+                0 10px 30px rgba(255, 0, 64, 0.4),
+                0 0 20px rgba(255, 0, 64, 0.3);
+            margin-top: 30px;
+            position: relative;
+            overflow: hidden;
+            animation: buttonPulse 2s ease infinite;
+        }
+
+        @keyframes buttonPulse {
+            0%, 100% { 
+                background-position: 0% 50%;
+                transform: scale(1);
+            }
+            50% { 
+                background-position: 100% 50%;
+                transform: scale(1.05);
+            }
+        }
+
+        .analyze-btn:hover {
+            transform: translateY(-5px) scale(1.1);
+            box-shadow: 
+                0 15px 40px rgba(255, 0, 64, 0.6),
+                0 0 30px rgba(255, 0, 64, 0.5);
+        }
+
+        .analyze-btn:active {
+            transform: translateY(-2px) scale(1.08);
+        }
+
+        .analyze-btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+            transform: none;
+            animation: none;
+        }
+
+        .loading {
+            display: none;
+            margin-top: 30px;
+            font-size: 1.2rem;
+            color: #00ffff;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+        }
+
+        .spinner {
+            display: inline-block;
+            width: 25px;
+            height: 25px;
+            border: 3px solid rgba(0, 255, 255, 0.3);
+            border-radius: 50%;
+            border-top-color: #00ffff;
+            animation: spin 1s linear infinite;
+            margin-right: 15px;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        /* Mobile responsive */
+        @media (max-width: 768px) {
+            .container {
+                padding: 20px 15px;
+            }
+
+            .main-panel {
+                padding: 30px 25px;
+                margin: 20px;
+            }
+
+            h1 {
+                font-size: 2.5rem;
+                letter-spacing: 2px;
+            }
+
+            .subtitle {
+                font-size: 1rem;
+            }
+
+            .analyze-btn {
+                padding: 18px 50px;
+                font-size: 1.1rem;
+            }
+
+            select {
+                padding: 15px 20px;
+                font-size: 1rem;
+            }
+        }
+
+        /* Status indicators */
+        .status-indicator {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            background: #00ff00;
+            box-shadow: 0 0 10px #00ff00;
+            animation: pulse 2s ease infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.5; }
+        }
+
+        /* Enhanced visual effects */
+        .glow-effect {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 200px;
+            height: 200px;
+            background: radial-gradient(circle, rgba(0, 255, 255, 0.1) 0%, transparent 70%);
+            border-radius: 50%;
+            transform: translate(-50%, -50%);
+            animation: rotate 20s linear infinite;
+            pointer-events: none;
+        }
+
+        @keyframes rotate {
+            from { transform: translate(-50%, -50%) rotate(0deg); }
+            to { transform: translate(-50%, -50%) rotate(360deg); }
+        }
+        .background-image-layer {
+            background-image: url('/static/f1_background.jpg');
+            background-size: cover;
+            background-position: center;
+            background-attachment: fixed;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            opacity: 0.3; /* Puoi regolare questo valore tra 0 (trasparente) e 1 (opaco) */
+            z-index: 0;
+            pointer-events: none;
+        }
+    </style>
+</head>
+<body>
+    <div class="background-image-layer"></div>
+
+    <!-- Particle effects -->
+    <div class="particles">
+        <!-- Particles will be generated by JavaScript -->
+    </div>
+
+    <!-- Racing lines -->
+    <div class="racing-lines">
+        <div class="racing-line"></div>
+        <div class="racing-line"></div>
+        <div class="racing-line"></div>
+    </div>
+
+    <div class="container">
+        <div class="main-panel">
+            <div class="status-indicator"></div>
+            <div class="glow-effect"></div>
+            
+            <h1>F1 Data Analytics</h1>
+            <p class="subtitle">Analisi Avanzata delle Prestazioni di Formula 1</p>
+            
+            <form class="form-container" id="analysisForm">
+                <div class="form-group">
+                    <label for="year">Seleziona Anno</label>
+                    <select id="year" name="year" required>
+                        <option value="">-- Scegli Anno --</option>
+                        <option value="2024">2024</option>
+                        <option value="2023">2023</option>
+                        <option value="2022">2022</option>
+                        <option value="2021">2021</option>
+                        <option value="2020">2020</option>
+                        <option value="2019">2019</option>
+                        <option value="2018">2018</option>
+                        <option value="2017">2017</option>
+                        <option value="2016">2016</option>
+                        <option value="2015">2015</option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label for="gp">Seleziona Gran Premio</label>
+                    <select id="gp" name="gp" required disabled>
+                        <option value="">-- Prima seleziona l'anno --</option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label for="driver">Seleziona Pilota</label>
+                    <select id="driver" name="driver" required disabled>
+                        <option value="">-- Prima seleziona l'anno --</option>
+                    </select>
+                </div>
+
+                <button type="submit" class="analyze-btn" id="analyzeBtn">
+                    Avvia Analisi
+                </button>
+
+                <div class="loading" id="loading">
+                    <div class="spinner"></div>
+                    Analisi in corso... Elaborazione dati telemetrici...
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script>
+        // Dati piloti e GP per anno
+        const pilotiPerAnno = {
+            2015: ["HAM", "ROS", "VET", "RAI", "BOT", "MAS", "ALO", "BUT", "RIC", "KVY", "PER", "HUL", "GRO", "MAL", "SAI", "VER", "ERI", "NAS"],
+            2016: ["HAM", "ROS", "VET", "RAI", "BOT", "MAS", "ALO", "BUT", "RIC", "VER", "PER", "HUL", "GRO", "GUT", "SAI", "KVY", "ERI", "NAS", "WEH", "OCO"],
+            2017: ["VET", "HAM", "BOT", "RAI", "VER", "RIC", "PER", "OCO", "HUL", "SAI", "STR", "MAS", "ALO", "VAN", "GRO", "MAG", "ERI", "WEH"],
+            2018: ["HAM", "VET", "RAI", "BOT", "VER", "RIC", "PER", "OCO", "HUL", "SAI", "LEC", "ERI", "GRO", "MAG", "ALO", "VAN", "STR", "SIR"],
+            2019: ["HAM", "BOT", "VET", "LEC", "VER", "GAS", "ALB", "RIC", "HUL", "SAI", "PER", "STR", "RAI", "GIO", "GRO", "MAG", "KUB", "RUS"],
+            2020: ["HAM", "BOT", "VER", "ALB", "LEC", "VET", "PER", "STR", "RIC", "OCO", "SAI", "NOR", "RAI", "GIO", "GRO", "MAG", "RUS", "LAT"],
+            2021: ["VER", "HAM", "BOT", "PER", "LEC", "SAI", "RIC", "NOR", "GAS", "TSU", "OCO", "ALO", "VET", "STR", "RAI", "GIO", "RUS", "LAT", "MSC", "MAZ"],
+            2022: ["VER", "PER", "LEC", "SAI", "HAM", "RUS", "NOR", "RIC", "OCO", "ALO", "GAS", "TSU", "VET", "STR", "BOT", "ZHO", "MSC", "MAG", "ALB", "LAT"],
+            2023: ["VER", "PER", "HAM", "RUS", "LEC", "SAI", "NOR", "PIA", "ALO", "STR", "GAS", "OCO", "ALB", "SAR", "BOT", "ZHO", "MAG", "HUL"],
+            2024: ["VER", "PER", "HAM", "RUS", "LEC", "SAI", "NOR", "PIA", "ALO", "STR", "GAS", "OCO", "ALB", "SAR", "BOT", "ZHO", "MAG", "HUL", "RIC", "TSU"]
+        };
+
+        const gpPerAnno = {
+            2015: ["Australia", "Malaysia", "China", "Bahrain", "Spain", "Monaco", "Canada", "Austria", "Great Britain", "Hungary", "Belgium", "Monza", "Singapore", "Japan", "Russia", "Austin", "Mexico", "Brazil", "Abu Dhabi"],
+            2016: ["Australia", "Bahrain", "China", "Russia", "Spain", "Monaco", "Canada", "Azerbaijan", "Austria", "Great Britain", "Hungary", "Germany", "Belgium", "Monza", "Singapore", "Malaysia", "Japan", "Austin", "Mexico", "Brazil", "Abu Dhabi"],
+            2017: ["Australia", "China", "Bahrain", "Russia", "Spain", "Monaco", "Canada", "Azerbaijan", "Austria", "Great Britain", "Hungary", "Belgium", "Monza", "Singapore", "Malaysia", "Japan", "Austin", "Mexico", "Brazil", "Abu Dhabi"],
+            2018: ["Australia", "Bahrain", "China", "Azerbaijan", "Spain", "Monaco", "Canada", "France", "Austria", "Great Britain", "Germany", "Hungary", "Belgium", "Monza", "Singapore", "Russia", "Japan", "Austin", "Mexico", "Brazil", "Abu Dhabi"],
+            2019: ["Australia", "Bahrain", "China", "Azerbaijan", "Spain", "Monaco", "Canada", "France", "Austria", "Great Britain", "Germany", "Hungary", "Belgium", "Monza", "Singapore", "Russia", "Japan", "Mexico", "Austin", "Brazil", "Abu Dhabi"],
+            2020: ["Austria", "Styria", "Hungary", "Great Britain", "70thAnniversary", "Spain", "Belgium", "Monza", "Tuscany", "Russia", "Eifel", "Portugal", "Imola", "Turkey", "Bahrain", "Sakhir", "Abu Dhabi"],
+            2021: ["Bahrain", "Imola", "Portugal", "Spain", "Monaco", "Azerbaijan", "France", "Styria", "Austria", "Great Britain", "Hungary", "Belgium", "Zandvoort", "Monza", "Russia", "Turkey", "Austin", "Mexico", "Brazil", "Qatar", "Saudi Arabia", "Abu Dhabi"],
+            2022: ["Bahrain", "Saudi Arabia", "Australia", "Imola", "Miami", "Spain", "Monaco", "Azerbaijan", "Canada", "Great Britain", "Austria", "France", "Hungary", "Belgium", "Zandvoort", "Monza", "Singapore", "Japan", "Austin", "Mexico", "Brazil", "Abu Dhabi"],
+            2023: ["Bahrain", "Saudi Arabia", "Australia", "Azerbaijan", "Miami", "Monaco", "Spain", "Canada", "Austria", "Great Britain", "Hungary", "Belgium", "Zandvoort", "Monza", "Singapore", "Japan", "Qatar", "Austin", "Mexico", "Brazil", "LasVegas", "Abu Dhabi"],
+            2024: ["Bahrain", "Saudi Arabia", "Australia", "Japan", "China", "Miami", "Imola", "Monaco", "Canada", "Spain", "Austria", "Great Britain", "Hungary", "Belgium", "Zandvoort", "Monza", "Azerbaijan", "Singapore", "Austin", "Mexico", "Brazil", "LasVegas", "Qatar", "Abu Dhabi"]
+        };
+
+        // Elementi DOM
+        const yearSelect = document.getElementById('year');
+        const gpSelect = document.getElementById('gp');
+        const driverSelect = document.getElementById('driver');
+        const analyzeBtn = document.getElementById('analyzeBtn');
+        const loading = document.getElementById('loading');
+        const form = document.getElementById('analysisForm');
+
+        // Gestione selezione anno
+        yearSelect.addEventListener('change', function() {
+            const selectedYear = parseInt(this.value);
+            
+            // Reset selects
+            gpSelect.innerHTML = '<option value="">-- Seleziona Gran Premio --</option>';
+            driverSelect.innerHTML = '<option value="">-- Prima seleziona l\'anno --</option>';
+            
+            if (selectedYear && gpPerAnno[selectedYear]) {
+                gpSelect.disabled = false;
+                driverSelect.disabled = false;
+                
+                // Popola Gran Premi
+                gpPerAnno[selectedYear].forEach(gp => {
+                    const option = document.createElement('option');
+                    option.value = gp;
+                    option.textContent = gp.replace(/([A-Z])/g, ' $1').trim();
+                    gpSelect.appendChild(option);
+                });
+
+                // Popola Piloti
+                driverSelect.innerHTML = '<option value="">-- Seleziona Pilota --</option>';
+                pilotiPerAnno[selectedYear].forEach(driver => {
+                    const option = document.createElement('option');
+                    option.value = driver;
+                    option.textContent = driver;
+                    driverSelect.appendChild(option);
+                });
+            } else {
+                gpSelect.disabled = true;
+                driverSelect.disabled = true;
+            }
+        });
+
+        // Gestione submit form
+        form.addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            const year = yearSelect.value;
+            const gp = gpSelect.value;
+            const driver = driverSelect.value;
+
+            if (!year || !gp || !driver) {
+                alert('Per favore seleziona tutti i campi');
+                return;
+            }
+
+            // Mostra loading
+            analyzeBtn.style.display = 'none';
+            loading.style.display = 'block';
+
+            // Simula caricamento e reindirizza
+            setTimeout(() => {
+                window.location.href = `/analyze?year=${year}&gp=${gp}&driver=${driver}`;
+            }, 1000);
+        });
+
+        // Genera particelle animate
+        function createParticles() {
+            const particlesContainer = document.querySelector('.particles');
+            const particleCount = 50;
+
+            for (let i = 0; i < particleCount; i++) {
+                const particle = document.createElement('div');
+                particle.className = 'particle';
+                particle.style.left = Math.random() * 100 + '%';
+                particle.style.top = Math.random() * 100 + '%';
+                particle.style.animationDelay = Math.random() * 6 + 's';
+                particle.style.animationDuration = (Math.random() * 3 + 3) + 's';
+                particlesContainer.appendChild(particle);
+            }
+        }
+
+        // Effetti hover per select
+        document.querySelectorAll('select').forEach(select => {
+            select.addEventListener('mouseenter', function() {
+                if (!this.disabled) {
+                    this.style.transform = 'translateY(-3px)';
+                    this.style.boxShadow = '0 0 25px rgba(0, 255, 255, 0.5)';
+                }
+            });
+
+            select.addEventListener('mouseleave', function() {
+                this.style.transform = 'translateY(0)';
+                if (!this.matches(':focus')) {
+                    this.style.boxShadow = '';
+                }
+            });
+        });
+
+        // Inizializza effetti
+        document.addEventListener('DOMContentLoaded', function() {
+            createParticles();
+            
+            // Anima il titolo dopo il caricamento
+            setTimeout(() => {
+                document.querySelector('h1').style.animation += ', pulse 2s ease-in-out infinite alternate';
+            }, 2000);
+        });
+    </script>
+</body>
+</html>
